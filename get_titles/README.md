@@ -1,0 +1,1 @@
+Takes a file consisting of a list of URLs as input and prints the title of the page.

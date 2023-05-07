@@ -19,9 +19,7 @@
 2. `lists.txt`에 포스트 URL 작성
 3. 다음 스크립트 실행.
    ```powershell
-   > .venv\Scripts\activate
-   > poetry install
-   > poetry run poetry run dogdripdl\main.py
+   > .\run.ps1
    ```
 
 ## Backlog

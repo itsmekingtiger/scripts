@@ -112,15 +112,16 @@ class DogDripDownloader:
             wsh = comclt.Dispatch("WScript.Shell")
             ActionChains(driver).move_to_element(element).context_click().perform()
             for i in range(index):
+                time.sleep(0.2)
                 wsh.SendKeys("{DOWN}")
-                time.sleep(0.3)
+            time.sleep(0.2)
             wsh.SendKeys("{Enter}")
             time.sleep(0.5)
 
         # 단일 파일 다운로드
         if len(elems) == 1:
             self.download_element(save_as_win32, elems[0])
-            time.sleep(0.5)
+            time.sleep(1)
 
             origin_filename = os.listdir(TEMPORAL_BASE_PATH)[0]
             ext = origin_filename.split(".")[-1]
@@ -138,7 +139,6 @@ class DogDripDownloader:
             # 엘리먼트 다운로드
             for index, elem in enumerate(elems):
                 self.download_element(save_as_win32, elem)
-                time.sleep(1)
 
                 origin_filename = os.listdir(TEMPORAL_BASE_PATH)[0]
                 ext = origin_filename.split(".")[-1]

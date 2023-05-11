@@ -1,6 +1,19 @@
-
 import os
 
+class AppException(Exception):
+    pass
+
+
+class CanNotCreateTempDir(AppException):
+    pass
+
+
+def mkdir_if_not_exist(tmpdir: str):
+    if os.path.exists(tmpdir):
+        if not os.path.isdir(tmpdir):
+            raise CanNotCreateTempDir(f'file "{tmpdir}" is alreay exists ant it is not dir')
+    else:
+        os.mkdir(tmpdir)
 
 def clear_dir(path: str):
     if not os.path.exists(path):

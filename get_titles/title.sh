@@ -6,8 +6,14 @@ read -p "Enter file name: " file
 # Read file line by line
 while read url; do
     # Use curl to get the page content and grep the title
-    # `-o` to print only matched string,
-    # `-P` to use Perl regex
+    #
+    # description:
+    #     `-o` to print only matched string,
+    #     `-P` to use Perl regex
+    #
+    #     `'(?<=<title>).*?(?=</title>)'` to extract content from `title` tag.
+    #         - `(?<=<title>)`: Find string that just after `<title>`, use Positive Lookbehind.
+    #         - `(?=</title>)`: Find string that just before`</title>`, user Positive Lookahead.
     title=$(curl -s "$url" | grep -oP '(?<=<title>).*?(?=</title>)')
 
     # Print the title

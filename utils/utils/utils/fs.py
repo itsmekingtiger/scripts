@@ -33,3 +33,6 @@ def clear_dir(path: str):
         elif os.path.isdir(file_path):
             clear_dir(file_path)
             os.rmdir(file_path)
+
+def save(file_name: str, content: bytes):
+    open(file_name, "wb").write(content)

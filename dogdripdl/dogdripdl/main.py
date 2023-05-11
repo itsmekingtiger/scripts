@@ -10,6 +10,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webelement import WebElement
+from utils import fs
 
 TEMPORAL_BASE_PATH: Final = os.path.join(os.getcwd(), "tmp")
 DOWNLOAD_BASE_PATH: Final = os.path.join(os.getcwd(), "downloads")
@@ -150,6 +151,22 @@ class DogDripDownloader:
                 )
 
     def download_element(self, save_as_win32: Callable, elem: WebElement):
+        def check_is_downloaded() -> bool:
+            files = os.listdir(TEMPORAL_BASE_PATH)
+            if not files:
+                return False
+
+            if len(files) != 1:
+                raise Exception("file is two")
+
+            origin_filename = files[0]
+            ext = origin_filename.split(".")[-1]
+
+            if ext in ["crdownload", "html", "hml", "htm"]:
+                raise Exception("downloaded wrong file")
+
+            return True
+
         match elem.tag_name:
             case "img":
                 save_as_win32(self.driver, elem, 2)
@@ -157,6 +174,13 @@ class DogDripDownloader:
                 save_as_win32(self.driver, elem, 4)
             case _:
                 raise Exception(f"알 수 없는 태그 네임: {elem.tag_name}")
+
+        for i in range(10):
+            time.sleep(1)
+            if check_is_downloaded():
+                return
+            print(f"download checking ({i+1}/{10})")
+        print("download failed")
 
     def extract_video_elems(self, element: WebElement):
         video_elems = element.find_elements(By.TAG_NAME, "video")
@@ -177,6 +201,8 @@ class DogDripDownloader:
 
 mkdir_if_not_exist(TEMPORAL_BASE_PATH)
 mkdir_if_not_exist(DOWNLOAD_BASE_PATH)
+
+fs.clear_dir(TEMPORAL_BASE_PATH)
 
 
 urls = load_list_of_urls("lists.txt")

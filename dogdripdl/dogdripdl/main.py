@@ -18,22 +18,6 @@ DOWNLOAD_BASE_PATH: Final = os.path.join(os.getcwd(), "downloads")
 LIMIT: Final = 200
 
 
-class AppException(Exception):
-    pass
-
-
-class CanNotCreateTempDir(AppException):
-    pass
-
-
-def mkdir_if_not_exist(tmpdir: str):
-    if os.path.exists(tmpdir):
-        if not os.path.isdir(tmpdir):
-            raise CanNotCreateTempDir()
-    else:
-        os.mkdir(tmpdir)
-
-
 # https://stackoverflow.com/questions/7406102
 def to_path_safe_string(s: str) -> str:
     """
@@ -135,7 +119,7 @@ class DogDripDownloader:
         else:  # 여러 파일 다운로드
             # 페이지 폴더 생성
             page_download_path = os.path.join(DOWNLOAD_BASE_PATH, self.get_title())
-            mkdir_if_not_exist(page_download_path)
+            fs.mkdir_if_not_exist(page_download_path)
 
             # 엘리먼트 다운로드
             for index, elem in enumerate(elems):
@@ -199,8 +183,8 @@ class DogDripDownloader:
         return img_elems
 
 
-mkdir_if_not_exist(TEMPORAL_BASE_PATH)
-mkdir_if_not_exist(DOWNLOAD_BASE_PATH)
+fs.mkdir_if_not_exist(TEMPORAL_BASE_PATH)
+fs.mkdir_if_not_exist(DOWNLOAD_BASE_PATH)
 
 fs.clear_dir(TEMPORAL_BASE_PATH)
 

@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 import time
@@ -34,6 +35,16 @@ def load_list_of_urls(url_list_file: str) -> List[str]:
 class Option(TypedDict):
     use_sequential_name: bool
     minimum_image_size: int
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(module)s/%(filename)s:%(lineno)d\t%(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+log = logging.getLogger()
+log.setLevel(logging.INFO)
 
 
 class DogDripDownloader:
@@ -79,6 +90,8 @@ class DogDripDownloader:
         )
 
     def download(self, url: str):
+        log.info(f"download page: {url}")
+
         # 지정된 URL로 이동
         self.driver.get(url)
 
@@ -91,17 +104,18 @@ class DogDripDownloader:
         elems = img_elems + video_elems
         elems.sort(key=lambda e: e.location["y"])
 
-        def save_as_win32(driver, element, index: int):
+        log.info(
+            f"\thas {len(elems)} elements, {len(img_elems)} images and {len(video_elems)} videos"
+        )
+
+        def save_as_win32(driver, element, delay: float = 0.2):
             import win32com.client as comclt
 
             wsh = comclt.Dispatch("WScript.Shell")
             ActionChains(driver).move_to_element(element).context_click().perform()
-            for i in range(index):
-                time.sleep(0.2)
-                wsh.SendKeys("{DOWN}")
             time.sleep(0.2)
-            wsh.SendKeys("{Enter}")
-            time.sleep(0.5)
+            wsh.SendKeys("{v}")
+            time.sleep(delay)
 
         # 단일 파일 다운로드
         if len(elems) == 1:
@@ -123,9 +137,15 @@ class DogDripDownloader:
 
             # 엘리먼트 다운로드
             for index, elem in enumerate(elems):
-                self.download_element(save_as_win32, elem)
+                log.info(f"\tdownload element: {elem}")
 
-                origin_filename = os.listdir(TEMPORAL_BASE_PATH)[0]
+                if src := self.get_source(elem):
+                    log.info(f"source detected: {src}")
+                else:
+                    log.warn(f"can not specify source of elements: {elem}")
+
+                origin_filename = self.download_element(save_as_win32, elem)
+
                 ext = origin_filename.split(".")[-1]
                 seq_filename = f"{elem.tag_name}_{index}.{ext}"
 
@@ -134,26 +154,32 @@ class DogDripDownloader:
                     os.path.join(page_download_path, seq_filename),
                 )
 
-    def download_element(self, save_as_win32: Callable, elem: WebElement):
-        def check_is_downloaded() -> bool:
+    def filter_exclude_htm_file(self, files: list[str]) -> list[str]:
+        return [f for f in files if not f.endswith(".htm")]
+
+    def download_element(self, save_as_win32: Callable, elem: WebElement) -> str:
+        def check_is_downloaded() -> Tuple[str, bool]:
             files = os.listdir(TEMPORAL_BASE_PATH)
             if not files:
-                return False
+                return ("", False)
 
+            files = self.filter_exclude_htm_file(files)
             if len(files) != 1:
-                raise Exception("file is two")
+                raise Exception(f"file is not one: {files}")
 
             origin_filename = files[0]
             ext = origin_filename.split(".")[-1]
 
+            log.info(f"{origin_filename} downloaded")
+
             if ext in ["crdownload", "html", "hml", "htm"]:
                 raise Exception("downloaded wrong file")
 
-            return True
+            return (origin_filename, True)
 
         match elem.tag_name:
             case "img":
-                save_as_win32(self.driver, elem, 2)
+                save_as_win32(self.driver, elem)
             case "video":
                 save_as_win32(self.driver, elem, 4)
             case _:
@@ -161,10 +187,11 @@ class DogDripDownloader:
 
         for i in range(10):
             time.sleep(1)
-            if check_is_downloaded():
-                return
+            name, ok = check_is_downloaded()
+            if ok:
+                return name
             print(f"download checking ({i+1}/{10})")
-        print("download failed")
+        raise Exception("download failed")
 
     def extract_video_elems(self, element: WebElement):
         video_elems = element.find_elements(By.TAG_NAME, "video")
@@ -181,6 +208,14 @@ class DogDripDownloader:
         ]
 
         return img_elems
+
+    def get_source(self, elem: WebElement) -> str:
+        """ """
+        if s := elem.get_attribute("src"):
+            return s
+        elif s := elem.find_element(By.TAG_NAME, "source"):
+            return s.get_attribute("src")
+        return ""
 
 
 fs.mkdir_if_not_exist(TEMPORAL_BASE_PATH)

@@ -6,7 +6,7 @@ import time
 from typing import List
 from urllib.parse import urljoin
 
-from utils import fs, url as liburl
+from utils import fs, hash, url as liburl
 import m3u8dl.ffmpeg as ffmpeg
 import m3u8dl.m3u8 as m3u8
 
@@ -138,7 +138,9 @@ def download_from_m3u8(url: str, header: "dict[str, str]"):
         log.error(f"something wrong: {e}")
 
     m3u8_path = os.path.join(TMP_DIR, TS_FILENAME)
-    new_filename = liburl.extract_subdomain(base_url) + ".ts"  # FIXME:
+    new_filename = f"{hash.calculate_sha256(m3u8_path).hex()}.ts"
+
+    log.info(f"download complete {url} → {new_filename}")
 
     if os.path.exists(m3u8_path):
         shutil.move(m3u8_path, new_filename)

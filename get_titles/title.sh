@@ -13,7 +13,7 @@ while read url; do
     #
     #     `'(?<=<title>).*?(?=</title>)'` to extract content from `title` tag.
     #         - `(?<=<title>)`: Find string that just after `<title>`, use Positive Lookbehind.
-    #         - `(?=</title>)`: Find string that just before`</title>`, user Positive Lookahead.
+    #         - `(?=</title>)`: Find string that just before`</title>`, use Positive Lookahead.
     title=$(curl -s "$url" | grep -oP '(?<=<title>).*?(?=</title>)')
 
     # Print the title

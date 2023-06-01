@@ -17,5 +17,5 @@ while read url; do
     title=$(curl -s "$url" | grep -oP '(?<=<title>).*?(?=</title>)')
 
     # Print the title
-    echo "Title of $url is: $title"
+    echo "$url - $title"
 done < "$file"

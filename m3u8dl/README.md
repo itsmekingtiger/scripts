@@ -1,6 +1,6 @@
 # m3u8dl
 
-My IDM does not download encrypted m3u8 vidieos.
+My IDM does not download encrypted m3u8 videos.
 
 # Usage
 

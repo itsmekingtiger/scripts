@@ -2,14 +2,11 @@ import logging
 import os
 import shutil
 import time
-from typing import Callable, Dict, Final, List, Tuple, TypedDict
+from typing import Callable, Final, List, Tuple, TypedDict
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webelement import WebElement
 from utils import fs
 
@@ -96,6 +93,12 @@ class DogDripDownloader:
         self.driver.get(url)
 
         # 이미지/비디오 요소 추출
+        element = self.driver.find_element(By.ID, "access")
+        if element:
+            log.warning(f"Can not download page: it seems to deleted")
+            return
+
+        # 이미지/비디오 요소 추출
         element = self.driver.find_element(By.ID, "article_1")
 
         img_elems = self.extract_img_elems(element)
@@ -155,7 +158,15 @@ class DogDripDownloader:
                 )
 
     def filter_exclude_htm_file(self, files: list[str]) -> list[str]:
-        return [f for f in files if not f.endswith(".htm")]
+        return [
+            f for f in files if not self.has_end_with_one_of(f, [".htm", ".crdownload"])
+        ]
+
+    def has_end_with_one_of(self, filename: str, endings: List[str]) -> bool:
+        for ending in endings:
+            if filename.endswith(ending):
+                return True
+        return False
 
     def download_element(self, save_as_win32: Callable, elem: WebElement) -> str:
         def check_is_downloaded() -> Tuple[str, bool]:

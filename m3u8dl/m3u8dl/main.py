@@ -67,6 +67,9 @@ def download_from_m3u8(url: str, header: "dict[str, str]"):
     try:
         # m3u8 다운로드
         m3u8_content = download(url, header)
+        if not m3u8_content:
+            raise Exception(f"Failed to download file: {url}.")
+
         m3u8_path = os.path.join(TMP_DIR, M3U8_FILENAME)
 
         fs.save(m3u8_path, m3u8_content)

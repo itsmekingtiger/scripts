@@ -93,10 +93,12 @@ class DogDripDownloader:
         self.driver.get(url)
 
         # 이미지/비디오 요소 추출
-        element = self.driver.find_element(By.ID, "access")
-        if element:
+        try:
+            element = self.driver.find_element(By.ID, "access")
             log.warning(f"Can not download page: it seems to deleted")
             return
+        except Exception as err:
+            pass
 
         # 이미지/비디오 요소 추출
         element = self.driver.find_element(By.ID, "article_1")

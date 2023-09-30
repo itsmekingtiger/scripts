@@ -15,14 +15,18 @@
 
 ## 사용법
 
-1. 크롬 버전에 맞는 크롬 드라이버를 프로젝트 루트에 위치
+1. 크롬 버전에 맞는 [크롬 드라이버]를 프로젝트 루트에 위치
 2. `lists.txt`에 포스트 URL 작성
 3. 다음 스크립트 실행.
    ```powershell
    > .\run.ps1
    ```
 
+
+[크롬 드라이버]: https://googlechromelabs.github.io/chrome-for-testing
+
 ## Backlog
 
 - [ ] 텍스트도 추출하고 마크다운으로 출력하는 기능 추가
 - [ ] 다운로드된 URL은 자동으로 제거하는 기능 추가
+
